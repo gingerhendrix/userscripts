@@ -1,6 +1,5 @@
 var Google = function(){
-    if(document.location.href == "http://www.google.com/"){
-        return {
+    var googleMain = {
             searchLinks : function (){
                 return getSingleNode("/html/body/center/form/table");
             },
@@ -17,9 +16,7 @@ var Google = function(){
                 return getSingleNode("/html/body/center/form/table/tbody/tr/td[2]/input[2]");
             }
         };
-    }else{
-        //Google IG  
-      return {
+     var googleIG = {
         searchLinks : function (){
             return getSingleNode("//*[@id='featuretabs']");
         },
@@ -35,8 +32,7 @@ var Google = function(){
         searchBox : function (){
             return getSingleNode("//*[@id='q']");
         }
-      };    
-    }
+      };   
     
     function getSingleNode(xpath){
         return document.evaluate(xpath,
@@ -44,5 +40,17 @@ var Google = function(){
                        null, 
                        XPathResult.FIRST_ORDERED_NODE_TYPE, 
                        null).singleNodeValue;
+    }
+    
+    
+    if(new RegExp("www.google.[^/]*/([?](.*))?$").test(document.location.href)){
+        return googleMain; 
+    }else if(new RegExp("www.google.[^/]*/ig([?](.*))?$").test(document.location.href)){
+        //Google IG  
+      return  googleIG
+    }else if(new RegExp("www.google.[^/]*/search([?](.*))?$").test(document.location.href)){
+        return null; //Google SERP
+    }else{
+       return null;
     }
 }();

@@ -2,16 +2,24 @@
 // @name          GoogleMultiSearch
 // @namespace     http://gandrew.com/projects/GoogleMultiSearch
 // @description   Adds multiple search engine support to the google search bar 
-// @include       http://www.google.com/
-// @include       http://www.google.co.uk/ig
-// @include       http://www.google.com/ig
+// @include       http://www.google.tld/*
 // @require bind.js
 // @require Google.js
 // @require animator.js
-// @require searchbars/googlex.js
 // @require searchbars/multisearch.js
 // @require menu.js
 // @import tag tag.png 
+// @import multisearch-google-sm logos/searchbar/35/google.png
+// @import multisearch-askx-sm logos/searchbar/35/ask_x.png
+// @import multisearch-wikipedia-sm logos/searchbar/35/wikipedia.png
+// @import multisearch-yahoo-sm logos/searchbar/35/yahoo.png
+// @import multisearch-youtube-sm logos/searchbar/35/youtube.png
+// @import multisearch-google-lg logos/searchbar/70/google.png
+// @import multisearch-askx-lg logos/searchbar/70/ask_x.png
+// @import multisearch-wikipedia-lg logos/searchbar/70/wikipedia.png
+// @import multisearch-yahoo-lg logos/searchbar/70/yahoo.png
+// @import multisearch-youtube-lg logos/searchbar/70/youtube.png
+
 // ==/UserScript==
 //
 // Changelog 
@@ -35,6 +43,9 @@ function disableForm(){
 }
 
 function init(){
+    if(!Google){
+        return;
+    }
 
     SearchEngines = SearchBars.Multisearch;
                     
