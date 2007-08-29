@@ -37,12 +37,12 @@ function addToHeader(){
 
 function toggleFolders(){
   if(treeSorted){
-    hideFolders();
-    menuButton.element.innerHTML = "Show Folders";
+    updateTree();
+    foldersButton.element.innerHTML = "Show Folders";
     foldersShown = false;
   }else{
-    showFolders();
-    menuButton.element.innerHTML = "Hide Folders";
+    updateTree();
+    foldersButton.element.innerHTML = "Hide Folders";
     foldersShown = true;
   }
 }
@@ -62,31 +62,59 @@ function showFolders(){
   subTree.parentNode.replaceChild(subTreeOld, subTree);
 }
 
-function hideFolders(){
+var masterTree;
+
+function updateTree(){
   var subs = googleReader.getSubscriptionList();
   var unread = subs.filter(function(s){
     return s.count > 0;
-  })
+  });
+  unread = unread.sort(function(s1, s2){
+    return (s2.count > s1.count ) ? 1 : ((s2.count < s1.count) ? -1 : 0);
+  });  
   
-  var oldTree = document.getElementById("sub-tree");
-  oldTree.style.display = "none";
-  oldTree.setAttribute("id", "sub-tree-old");
-   
-  var newTree = document.getElementById("sub-tree-new");
-  if(newTree){
-
-  }else{
-    newTree = oldTree.cloneNode(false);
-    unread.forEach(function(sub){
-      var id = sub.id.replace("feed/", "");
-      var xpath = "id('sub-tree-old')//a[contains(@href,'/reader/view/feed/"+encodeURIComponent(id)+"')]";
-      var originalLink = getSingleNode(xpath, oldTree);
-      var newLink = originalLink.parentNode.cloneNode(true);
-      newTree.appendChild(newLink);
-    });
-    oldTree.parentNode.appendChild(newTree);
+  if(!masterTree){
+    masterTree = document.getElementById("sub-tree");
+    masterTree.style.display = "none";
+    masterTree.setAttribute("id", "sub-tree-master");
   }
-  
+  var newTree = masterTree.cloneNode(false);
+
+  unread.forEach(function(sub){
+    var id = sub.id;
+    if(id.search(/^feed\//) !=-1){
+      id = id.replace(/^feed\//, "");
+      id = "feed/" + encodeURIComponent(id);
+    }else{
+      id = sub.id.replace(/(user\/)([0-9]*)(\/label)/, "$1-$3");
+      return;
+    }
+    GM_log("Cloning Link " + id + "");
+    var xpath = "id('sub-tree-master')//a[contains(@href,'/reader/view/"+id+"')]";
+    
+    var originalLink = getSingleNode(xpath, masterTree);
+    if(!originalLink){
+      GM_log("Link " + id + " not found");
+      return;
+    }
+    GM_log("Element " + originalLink.parentNode + "");
+    var newLink = originalLink.parentNode.cloneNode(true);
+    newLink.addEventListener("click", function(e){
+        var evt = document.createEvent("MouseEvents");
+        evt.initEvent("click", true, false, 
+                      window, 1,
+                      0, 0, 0, 0,
+                      false, false, false, false,
+                      0, null);
+        originalLink.dispatchEvent(evt);
+        e.preventDefault();
+        e.stopPropagation();
+    }, true);
+    newTree.appendChild(newLink);
+  });
+
+  masterTree.parentNode.appendChild(newTree);
+
   newTree.style.display = "block";
   newTree.setAttribute("id", "sub-tree");
 }
