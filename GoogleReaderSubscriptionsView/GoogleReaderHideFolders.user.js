@@ -9,7 +9,7 @@
 //
 // Changelog 
 // 0.1  - 01/08/07 - Project started
-//
+// 0.2 -  29/08/07 - Refactored page wrangling code into GoogleReaderLens
 // == Todo ==
 
 var readerLens = new GoogleReaderLens();
@@ -24,32 +24,34 @@ function loaded(){
   googleReader.init();
 }
 
-var div;
-var labelsShown = true;
+var menuButton;
+var foldersShown = true;
+var treeSorted = false;
 
 function addToHeader(){
-  var header = document.getElementById("new-subscriptions-header");
-  div = document.createElement("div");
-  div.innerHTML = "Hide Folders";
-  div.addEventListener("click", toggleLabels, false);
-  div.style.textDecoration = "underline";
-  div.style.cursor = "pointer";
-  header.appendChild(div);
+  GM_log("AddToHeader")
+  var menu = readerLens.subscriptionList.header.addSubmenu()
+  foldersButton = menu.addItem("Hide Folders", toggleFolders);
+  sortButton = menu.addItem("Sort By Unread", toggleSort);
 }
 
-function toggleLabels(){
-  if(labelsShown){
-    hideLabels();
-    div.innerHTML = "Show Folders";
-    labelsShown = false;
+function toggleFolders(){
+  if(treeSorted){
+    hideFolders();
+    menuButton.element.innerHTML = "Show Folders";
+    foldersShown = false;
   }else{
-    showLabels();
-    div.innerHTML = "Hide Folders";
-    labelsShown = true;
+    showFolders();
+    menuButton.element.innerHTML = "Hide Folders";
+    foldersShown = true;
   }
 }
 
-function showLabels(){
+function toggleSort(){
+
+}
+
+function showFolders(){
   var subTree = document.getElementById("sub-tree");
   subTree.setAttribute("id", "sub-tree-new");
   
@@ -60,7 +62,7 @@ function showLabels(){
   subTree.parentNode.replaceChild(subTreeOld, subTree);
 }
 
-function hideLabels(){
+function hideFolders(){
   var subs = googleReader.getSubscriptionList();
   var unread = subs.filter(function(s){
     return s.count > 0;
