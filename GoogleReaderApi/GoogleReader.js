@@ -3,6 +3,9 @@ function GoogleReader(){
  var _COMMAND_TOKEN;
  var subscriptionList;
  var subscriptionIndex;
+ var labelList = [];
+ var labelMap = {};
+ 
  var thisObj = this;
  
  this.onload = function(){};
@@ -14,7 +17,15 @@ function GoogleReader(){
       this.onload.call(thisObj);
     }) 
    });
+ }
+ 
+ this.getLabels = function(){
+   return labelList;
  } 
+ 
+ this.getSubscriptionsByLabel = function(label){
+   return labelMap[label];
+ }
  
  this.getSubscriptionList = function(){
    return subscriptionList;
@@ -35,11 +46,9 @@ function GoogleReader(){
             var jsonObj = eval('('+json+')');
             var subs = jsonObj.subscriptions;
             subscriptionIndex = {};
-            subs.forEach(function(sub){
-              subscriptionIndex[sub.id] = sub;
-            });
+            subscriptionList = [];
+            subs.forEach(addSubscription);
             GM_log("Subscription list updated " + subs.length + " items");
-            subscriptionList = subs;
             if(callback){
               callback.call(thisObj);
             }
@@ -48,6 +57,31 @@ function GoogleReader(){
           }
         }
     });
+  }
+  
+  function updateLabel(sub){
+    if(!labelMap[sub.id]){
+      labelList.push(sub);
+      labelMap[sub.id] = [];
+    }
+  }
+  
+  function addSubscription(sub){
+    sub.isLabel = false;
+    sub.isState = false;
+    if(sub.id.match(/user\/[0-9]*\/label\//)){
+      updateLabel(sub);
+      sub.isLabel = true;
+    }else if(sub.id.match(/user\/[0-9]*\/state\//)){
+       sub.isState = true;
+    }else{
+      sub.categories.forEach(function(label){
+        updateLabel({id: label.id})
+        labelMap[label.id].push(sub.id);
+      });
+    }
+    subscriptionList.push(sub);
+    subscriptionIndex[sub.id] = sub;
   }
   
   this.updateUnreadCount = function(callback){
@@ -64,7 +98,7 @@ function GoogleReader(){
               if( subscriptionIndex[count.id]){
                  subscriptionIndex[count.id].count = count.count;
               }else{
-                GM_log("Subscription " + count.id + " not found");
+                addSubscription({id: count.id, count : count.count});
               }
             });
             if(callback){
