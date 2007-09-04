@@ -3,12 +3,13 @@ var Menu = function(){
     this.items = [];
     this.element;
     this.animationState = 0;
-    this.o
+    this.o;
+    this.textColor = "inherit";
 }
 
 Menu.prototype.makeMenu = function(){
     this.element = document.createElement("div");
-    this.element.style.marginTop = "-35px";
+ 
     this.element.style.marginLeft = "auto";
     this.element.style.width = ((SearchEngines.length * 39) + 37) + "px";
     this.element.style.marginRight = "auto";
@@ -20,6 +21,8 @@ Menu.prototype.makeMenu = function(){
     this.title.style.marginBottom = "-2px";
     this.title.style.textAlign = "center";
     this.title.style.width = "70px";
+    this.title.style.color = this.textColor;
+    GM_log("TextColor: " + this.title.style.color);
     this.element.appendChild(this.title);
     
     for(var i=0; i<SearchEngines.length; i++){
@@ -65,11 +68,6 @@ Menu.prototype.makeTag = function(){
     return tag;
 }
 
-Menu.prototype.menuClick = function(engine, e){
-   var button = Google.searchButton();
-   selected = engine;
-   button.value = engine.name + " Search"; 
-}
 
 
 Menu.prototype.menuOver = function (engine){

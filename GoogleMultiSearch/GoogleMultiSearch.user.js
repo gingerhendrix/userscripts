@@ -26,21 +26,25 @@
 // 0.1  - 06/03/07 - Project started
 // 0.2 - 02/03/07 - Support for google/ig (personalized homepage)
 // 0.3 - 30/04/07 - Refactored using gm-imports
+// 0.4 - 04/08/07 - Refactored Google.js page wrapper.
 
 
+//globals;
+var SearchEngines;
+var selected;
 
-function formSubmit(e){
-    var search = Google.searchBox().value;
+function formSubmit(){
+    var search = Google.form.value();
     var url = selected.searchUrl;
     url = url.replace(/(%s)/, search);
     window.location.href = url;
-    e.preventDefault();    
 }
 
-function disableForm(){
-    var form = Google.searchForm();
-    form.addEventListener("submit", formSubmit, true)   
+function menuClick(engine, e){
+   selected = engine;
+   Google.form.setButtonValue(engine.name + " Search");
 }
+
 
 function init(){
     if(!Google){
@@ -56,15 +60,13 @@ function init(){
     
     selected = SearchEngines[0];
     
-    disableForm();
+    Google.form.onsubmit(formSubmit);
+    
     var menu = new ImageMenu();
+    menu.textColor = Google.getTextColor();
+    menu.menuClick = menuClick;
     var menuElement = menu.makeMenu();
-    var searchLinks = Google.searchLinks();
-    searchLinks.parentNode.replaceChild(menu.element, searchLinks);
+    Google.insertMenu(menuElement);
 }
-
-//globals;
-var SearchEngines = SearchBars.Multisearch;
-var selected;
 
 init();

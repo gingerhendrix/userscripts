@@ -1,38 +1,39 @@
 var Google = function(){
-    var googleMain = {
-            searchLinks : function (){
-                return getSingleNode("/html/body/center/form/table");
-            },
-            
-            searchForm : function (){
-                return getSingleNode("/html/body/center/form");
-            },
-            
-            searchButton : function (){
-                return getSingleNode("/html/body/center/form/table/tbody/tr/td[2]/input[3]");
-            },
-            
-            searchBox : function (){
-                return getSingleNode("/html/body/center/form/table/tbody/tr/td[2]/input[2]");
-            }
-        };
-     var googleIG = {
-        searchLinks : function (){
-            return getSingleNode("//*[@id='featuretabs']");
-        },
-        
-        searchForm : function (){
-            return getSingleNode("//*[@id='sfrm']");
-        },
-        
-        searchButton : function (){
-            return getSingleNode("//input[@name='btnG']");
-        },
-        
-        searchBox : function (){
-            return getSingleNode("//*[@id='q']");
-        }
-      };   
+     var googleIG = function(){
+      
+       return {
+          form : {
+             value : function(){
+               var searchBox = getSingleNode("//*[@id='q']");
+               return searchBox.value;
+             },
+             onsubmit : function(func){
+               var searchForm = getSingleNode("//*[@id='sfrm']");
+               searchForm.addEventListener("submit", function(e){
+                 func();
+                 e.preventDefault();
+               }, true)   
+             },
+             setButtonValue : function(val){
+               var searchButton = getSingleNode("//input[@name='btnG']");
+               searchButton.value = val;
+             }
+          },
+          
+          insertMenu : function(menu){
+            var searchBox = document.getElementById("gsea");
+            searchBox.parentNode.insertBefore(menu, searchBox);
+            menu.style.marginTop = "0px";
+            menu.style.marginBottom = "-20px";
+            menu.style.zIndex = "5";
+          },
+          
+          getTextColor : function(){
+            var refNode = getSingleNode("//p[@class='gseaopt']/a");
+            return document.defaultView.getComputedStyle(refNode, null)["color"];
+          }  
+       }
+     };  
     
     function getSingleNode(xpath){
         return document.evaluate(xpath,
@@ -44,10 +45,9 @@ var Google = function(){
     
     
     if(new RegExp("www.google.[^/]*/([?](.*))?$").test(document.location.href)){
-        return googleMain; 
+        return null;//Google main page 
     }else if(new RegExp("www.google.[^/]*/ig([?](.*))?$").test(document.location.href)){
-        //Google IG  
-      return  googleIG
+      return  googleIG();
     }else if(new RegExp("www.google.[^/]*/search([?](.*))?$").test(document.location.href)){
         return null; //Google SERP
     }else{
